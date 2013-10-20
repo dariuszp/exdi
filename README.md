@@ -3,7 +3,7 @@ exdi
 
 Dependency injection container for JavaScript
 
-## 1.0.3
+## 1.1.0
 
 To install exdi use
 ```JavaScript

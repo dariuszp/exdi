@@ -1,6 +1,6 @@
 {
     "name": "exdi",
-    "version": "1.0.3",
+    "version": "1.1.0",
     "description": "Dependency injection container",
     "main": "index.js",
     "scripts": {
