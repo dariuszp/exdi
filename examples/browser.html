@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>Exdi</title>
+    <script type="text/javascript" src="./../src/exdi.min.js"></script>
+    <script type="text/javascript">
+        var myContainer = exdi.get('test');
+        myContainer.set('x', 1);
+        myContainer.set('y', 2);
+        myContainer.set('Test', function (x, y) {
+            return x + y;
+        });
+        document.write(myContainer.get('Test'));
+        console.log(exdi);
+        console.log(myContainer);
+        console.log(exdi.get('test').get('x'));
+    </script>
+</head>
+<body>
+
+</body>
+</html>
