@@ -1,0 +1,27 @@
+{
+    "name": "exdi",
+    "version": "0.0.0",
+    "description": "Dependency injection container",
+    "main": "index.js",
+    "scripts": {
+        "test": "node ./tests/di.js"
+    },
+    "repository": {
+    "type": "git",
+    "url": "git@github.com:dariuszp/exdi.git"
+    },
+    "devDependencies": {
+        "colog": "*"
+    },
+    "keywords": [
+        "dependency",
+        "injection",
+        "di",
+        "container"
+    ],
+    "author": "Półtorak Dariusz",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/dariuszp/exdi/issues"
+    }
+}
