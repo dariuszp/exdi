@@ -70,14 +70,18 @@ function Container(container) {
     /**
      * Get container value
      * @param name
+     * @param params []|undefined
      * @returns {*}
      */
-    this.get = function (name) {
+    this.get = function (name, params) {
         if (name[0].toString().length === 0) {
             throw new Error('Invalid name');
         }
         if (/^[A-Z]/.test(name[0].toString()) && typeof container[name] === 'function') {
-            return this.execute(container[name]);
+            return this.execute(container[name], params);
+        }
+        if (container[name] === undefined) {
+            return params;
         }
         return container[name];
     };

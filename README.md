@@ -3,7 +3,7 @@ exdi
 
 Dependency injection container for JavaScript
 
-## 1.0.0
+## 1.0.3
 
 To install exdi use
 ```JavaScript
@@ -35,6 +35,10 @@ myContainer.set('myValue', 5);
 To get value use:
 ```JavaScript
 myContainer.get('myValue'); // will return 5
+```
+To make sure you don't get undefined value, set default value when you request parameter:
+```JavaScript
+myContainer.get('myMissingValue', 4); // will return 4
 ```
 Exdi follow simple convention.
 > Every value name that starts with capital letter is a constructor. So only acceptable value is a **function**.
@@ -73,12 +77,19 @@ myContainer.get('Builder'); // Lucky number IS 7
 ```
 You can also execute any function with container parameters.
 ```JavaScript
-function showX(x) {
-    return x;
+function showX(x, y) {
+    return x + ' ' + y;
 }
 
 myContainer.set('x', 5);
-myContainer.execute(showX);
+myContainer.set('y', 5);
+myContainer.execute(showXY);
+```
+And if you need to overwrite one of the container parameters (or provide new), you can always pass object as second parameter of execute:
+```JavaScript
+myContainer.execute(showXY, {
+    y: 1
+});
 ```
 You can even have builders in builders:
 ```JavaScript

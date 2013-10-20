@@ -155,6 +155,42 @@ exports.containerInContainer = function (test) {
     test.done();
 };
 
+exports.getParameterDefaultValue = function (test) {
+    var getContainer = di.get('getContainer');
+    getContainer.set('one', 5);
+    test.strictEqual(getContainer.get('one'), 5, 'Got invalid value');
+    test.strictEqual(getContainer.get('two'), undefined, 'Not existing value is not undefined');
+    test.strictEqual(getContainer.get('two', 4), 4, 'Default value is not 4');
+    test.done();
+};
+
+exports.overwriteExecuteParameters = function (test) {
+    var overwriteContainer = di.get('overwriteContainer');
+    overwriteContainer.set('x', 1);
+    overwriteContainer.set('y', 2);
+
+    function add(x, y) {
+        return x + y;
+    }
+
+    test.strictEqual(overwriteContainer.execute(add), 3, 'Execute did not extract parameters from container');
+    test.strictEqual(overwriteContainer.execute(add, {
+        x: 2
+    }), 4, 'Execute did not overwrite container parameter');
+    test.strictEqual(overwriteContainer.execute(add, {
+        x: 2,
+        y: 8
+    }), 10, 'Execute did not overwrite both container parameter');
+
+    function add2(x, y, z) {
+        return x + y + z;
+    }
+    test.strictEqual(overwriteContainer.execute(add2, {
+        z: 5
+    }), 8, 'Adding another parameter did not worked');
+    test.done();
+}
+
 exports.testReadmeExamples = function (test) {
     var exdi = require(__dirname + '/../index.js');
     var myContainer = exdi.get('myContainer');
@@ -192,11 +228,16 @@ exports.testReadmeExamples = function (test) {
     test.strictEqual(myContainer.get('Builder'), 'Lucky number IS 7', 'Example 6');
 
 
-    function showX(x) {
-        return x;
+    function showXY(x, y) {
+        return x + ' ' + y;
     }
+
     myContainer.set('x', 5);
-    test.strictEqual(myContainer.execute(showX), 5, 'Example 7');
+    myContainer.set('y', 5);
+    test.strictEqual(myContainer.execute(showXY), '5 5', 'Example 7');
+    test.strictEqual(myContainer.execute(showXY, {
+        y: 1
+    }), '5 1', 'Example 7.1');
 
 
     myContainer.set('One', function () {
