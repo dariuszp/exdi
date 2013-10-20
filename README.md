@@ -93,5 +93,18 @@ myContainer.set('Three', function (Two) {
 });
 myContainer.get('Three'); // THIS IS SPARTA!
 ```
+And there is no reason why you should not have containers in containers:
+```JavaScript
+myContainer2 = exdi.get('myContainer2');
+myContainer.set('x', 1);
+myContainer2.set('x', 2);
 
+myContainer2.set('c', myContainer);
+
+myContainer2.set('Test', function (c, x) {
+    return x + c.get('x');
+});
+
+myContainer2.get('Test'); // Should be 3
+```
 Quite useful if you ask me.

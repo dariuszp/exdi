@@ -138,6 +138,23 @@ exports.deleteUndefinedContainer = function (test) {
     test.done();
 };
 
+exports.containerInContainer = function (test) {
+    var myContainer1 = di.get('container1'),
+        myContainer2 = di.get('container2');
+
+    myContainer1.set('x', 1);
+    myContainer2.set('x', 2);
+
+    myContainer2.set('c', myContainer1);
+
+    myContainer2.set('Test', function (x, c) {
+        return x + c.get('x');
+    });
+
+    test.strictEqual(myContainer2.get('Test'), 3, 'Container in container does not work');
+    test.done();
+};
+
 exports.testReadmeExamples = function (test) {
     var exdi = require(__dirname + '/../index.js');
     var myContainer = exdi.get('myContainer');
@@ -193,5 +210,16 @@ exports.testReadmeExamples = function (test) {
     });
     test.strictEqual(myContainer.get('Three'), 'THIS IS SPARTA!', 'Example 8');
 
+    var myContainer2 = exdi.get('myContainer2');
+    myContainer.set('x', 1);
+    myContainer2.set('x', 2);
+
+    myContainer2.set('c', myContainer);
+
+    myContainer2.set('Test', function (c, x) {
+        return x + c.get('x');
+    });
+
+    test.strictEqual(myContainer2.get('Test'), 3, 'Example 9');
     test.done();
 };
