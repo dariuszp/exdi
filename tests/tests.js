@@ -1,7 +1,6 @@
 'use strict';
 
-var colog           = require('colog'),
-    Container       = require(__dirname + '/../src/Container.js'),
+var Container       = require(__dirname + '/../src/Container.js'),
     Containers      = require(__dirname + '/../src/Containers.js'),
     di              = require(__dirname + '/../index.js');
 
