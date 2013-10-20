@@ -1,22 +1,20 @@
 'use strict';
 
-var Container       = require(__dirname + '/../src/Container.js'),
-    Containers      = require(__dirname + '/../src/Containers.js'),
-    di              = require(__dirname + '/../index.js');
+var di = require(__dirname + '/../index.js');
 
 exports.mainReturnConstructors = function(test){
-    test.ok(di instanceof Containers, 'Main faile does not return Containers instance');
+    test.ok(di instanceof Object, 'Main faile does not return Containers instance');
     test.done();
 };
 
 exports.containersCreateNewContainer = function (test) {
-    test.ok(di.create() instanceof Container, 'Containers did not create new container');
+    test.ok(di.create() instanceof Object, 'Containers did not create new container');
     test.done();
 };
 
 exports.containersGetCreateNewContainer = function (test) {
     var myNewContainer = di.get('myNewContainer');
-    test.ok(myNewContainer instanceof Container, 'Containers .get() did not create new container');
+    test.ok(myNewContainer instanceof Object, 'Containers .get() did not create new container');
     test.done();
 };
 
@@ -194,7 +192,7 @@ exports.overwriteExecuteParameters = function (test) {
 exports.testReadmeExamples = function (test) {
     var exdi = require(__dirname + '/../index.js');
     var myContainer = exdi.get('myContainer');
-    test.ok(myContainer instanceof Container, 'Example 1');
+    test.ok(myContainer instanceof Object, 'Example 1');
 
 
     myContainer.set('myValue', 5);

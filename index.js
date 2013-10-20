@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = new (require(__dirname + '/src/Containers.js'))();
+module.exports = require(__dirname + '/src/exdi.js');
 
 
