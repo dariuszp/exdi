@@ -1,4 +1,4 @@
-exdi [![Build Status](https://travis-ci.org/dariuszp/exdi.png?branch=1.1.1)](https://travis-ci.org/dariuszp/exdi)
+exdi [![Build Status](https://travis-ci.org/dariuszp/exdi.png?branch=master)](https://travis-ci.org/dariuszp/exdi)
 ====
 
 Dependency injection container for JavaScript
