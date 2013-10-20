@@ -1,5 +1,8 @@
 'use strict';
 
+/**
+ * Extract parameter names from any function
+ */
 function getFunctionParametersNames(fn) {
     var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m,
         FN_ARG_SPLIT = /\s*,\s*/,
@@ -32,6 +35,12 @@ function getFunctionParametersNames(fn) {
     return parameters;
 }
 
+/**
+ * Dependency injection container
+ * @param container
+ * @returns {Container}
+ * @constructor
+ */
 function Container(container) {
     if ((this instanceof Container) === false) {
         return new Container(container);
@@ -45,7 +54,7 @@ function Container(container) {
      * element if it is a function. So first upper case means that value is a constructor
      * @param name
      * @param value
-     * @returns {*}
+     * @returns Container
      */
     this.set = function (name, value) {
         if (name[0].toString().length === 0) {
@@ -58,6 +67,11 @@ function Container(container) {
         return this;
     };
 
+    /**
+     * Get container value
+     * @param name
+     * @returns {*}
+     */
     this.get = function (name) {
         if (name[0].toString().length === 0) {
             throw new Error('Invalid name');
@@ -68,6 +82,20 @@ function Container(container) {
         return container[name];
     };
 
+    /**
+     * Delete container value
+     * @param name
+     */
+    this.delete = function (name) {
+        delete container[name];
+    };
+
+    /**
+     * Execute given function using container parameters
+     * @param fn
+     * @param params
+     * @returns {*}
+     */
     this.execute = function (fn, params) {
         if (!params) {
             params = [];

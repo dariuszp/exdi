@@ -54,6 +54,13 @@ exports.specialCharactersAreNotConstructors = function (test) {
     test.done();
 };
 
+exports.smallLetterValuesDoesNotExecuteFunctions = function (test) {
+    var mySmallValueContainer = di.get('mySmallValueContainer');
+    mySmallValueContainer.set('test', function () { return 1; });
+    test.ok(typeof mySmallValueContainer.get('test') === 'function', 'Small letter parameters should not execute functions');
+    test.done();
+};
+
 exports.constructorUseContainerParameters = function (test) {
     var parametersConstructor = di.get('parametersConstructor');
     parametersConstructor.set('myValue', 'exdi');
@@ -117,5 +124,75 @@ exports.containerDeletion = function (test) {
     test.ok(all.parametersConstructor2 === undefined, 'Defined container is not removed');
     di.get('parametersConstructor2');
     test.ok(all.parametersConstructor2.get('test') === undefined, 'Defined container is not removed');
+    test.done();
+};
+
+exports.deleteUndefinedContainer = function (test) {
+    test.doesNotThrow(function () {
+        di.delete('undefinedContainer');
+    }, undefined, 'Failed to delete undefined container');
+
+    test.doesNotThrow(function () {
+        di.get('garbageContainer').delete('undefinedValue');
+    }, undefined, 'Failed to delete undefined container parameter');
+
+    test.done();
+};
+
+exports.testReadmeExamples = function (test) {
+    var exdi = require(__dirname + '/../index.js');
+    var myContainer = exdi.get('myContainer');
+    test.ok(myContainer instanceof Container, 'Example 1');
+
+
+    myContainer.set('myValue', 5);
+    test.strictEqual(myContainer.get('myValue'), 5, 'Example 2');
+
+
+    test.throws(function () {
+        myContainer.set('Builder', 'Hello world');
+    }, undefined, 'Example 3');
+
+
+    myContainer.set('Builder', function () {
+        return 'Hello world';
+    });
+    test.strictEqual(myContainer.get('Builder'), 'Hello world', 'Example 4');
+
+
+    myContainer.set('Builder', function (luckyNumber) {
+        return 'Lucky number ' + luckyNumber;
+    });
+    myContainer.set('luckyNumber', 7);
+    test.strictEqual(myContainer.get('Builder'), 'Lucky number 7', 'Example 5');
+
+
+    myContainer.set('Builder', function (LuckyNumber) {
+        return 'Lucky number ' + LuckyNumber;
+    });
+    myContainer.set('LuckyNumber', function () {
+        return 'IS 7';
+    });
+    test.strictEqual(myContainer.get('Builder'), 'Lucky number IS 7', 'Example 6');
+
+
+    function showX(x) {
+        return x;
+    }
+    myContainer.set('x', 5);
+    test.strictEqual(myContainer.execute(showX), 5, 'Example 7');
+
+
+    myContainer.set('One', function () {
+        return 'THIS';
+    });
+    myContainer.set('Two', function (One) {
+        return One + ' IS';
+    });
+    myContainer.set('Three', function (Two) {
+        return Two + ' SPARTA!';
+    });
+    test.strictEqual(myContainer.get('Three'), 'THIS IS SPARTA!', 'Example 8');
+
     test.done();
 };
