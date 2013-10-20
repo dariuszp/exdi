@@ -51,7 +51,7 @@ function Container(container) {
         if (name[0].toString().length === 0) {
             throw new Error('Invalid name');
         }
-        if (name[0].toString() === name[0].toString().toUpperCase() && typeof value !== 'function') {
+        if (/^[A-Z]/.test(name[0].toString()) && typeof value !== 'function') {
             throw new Error('All variables named using first capital letter are constructors and must have first capital letter.');
         }
         container[name] = value;
@@ -62,7 +62,7 @@ function Container(container) {
         if (name[0].toString().length === 0) {
             throw new Error('Invalid name');
         }
-        if (name[0].toString() === name[0].toString().toUpperCase() && typeof container[name] === 'function') {
+        if (/^[A-Z]/.test(name[0].toString()) && typeof container[name] === 'function') {
             return this.execute(container[name]);
         }
         return container[name];

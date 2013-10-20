@@ -4,14 +4,15 @@
     "description": "Dependency injection container",
     "main": "index.js",
     "scripts": {
-        "test": "node ./tests/di.js"
+        "test": "nodeunit ./tests/tests.js"
     },
     "repository": {
     "type": "git",
     "url": "git@github.com:dariuszp/exdi.git"
     },
     "devDependencies": {
-        "colog": "*"
+        "colog": "*",
+        "nodeunit": "*"
     },
     "keywords": [
         "dependency",

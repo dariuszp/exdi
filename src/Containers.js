@@ -16,10 +16,14 @@ function Containers() {
         return containers[name];
     };
 
+    this.all = function () {
+        return containers;
+    };
+
     this.delete = function (name) {
         delete containers[name];
         return this;
-    }
+    };
 
     this.create = function () {
         return new Container();
