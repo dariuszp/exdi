@@ -78,12 +78,12 @@ if (typeof window !== 'undefined') {
          * @param params []|undefined
          * @returns {*}
          */
-        this.get = function (name, params) {
+        this.get = function (name, params, constructorContext) {
             if (name[0].toString().length === 0) {
                 throw new Error('Invalid name');
             }
             if (/^[A-Z]/.test(name[0].toString()) && typeof container[name] === 'function') {
-                return this.execute(container[name], params);
+                return this.execute(container[name], params, constructorContext);
             }
             if (container[name] === undefined) {
                 return params;
@@ -106,7 +106,7 @@ if (typeof window !== 'undefined') {
          * @param params
          * @returns {*}
          */
-        this.execute = function (fn, params) {
+        this.execute = function (fn, params, context) {
             if (!params) {
                 params = [];
             }
@@ -133,7 +133,7 @@ if (typeof window !== 'undefined') {
                 }
             }
 
-            return fn.apply(fn, applyParameters);
+            return fn.apply(context instanceof Object ? context : this, applyParameters);
         };
     }
 

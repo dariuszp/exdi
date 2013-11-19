@@ -3,6 +3,24 @@ exdi [![Build Status](https://travis-ci.org/dariuszp/exdi.png?branch=master)](ht
 
 Dependency injection container for JavaScript
 
+## 1.1.2
+
+* fixes .execute(). Now there is a third parameter - execution context. If no context object is provided, function is executed using container as context.
+
+In other words, when you are executing function or getting "constructor" from container, this of that function will be pointing to given object or container itself.
+
+To do that, do:
+```JavaScript
+exdi.execute(myFunction, [ my: 'params' ], someObject);
+```
+or
+```JavaScript
+exdi.get('SomeConstructor', [ my: 'params' ], someObject);
+```
+where some object is... well some object and function under "SomeConstructor" will be called in the same way like this:
+someObject.someConstructor([ my: 'params' ]).
+
+
 ## 1.1.1
 
 To install exdi use

@@ -189,6 +189,30 @@ exports.overwriteExecuteParameters = function (test) {
     test.done();
 }
 
+exports.executionContext = function (test) {
+    var ec = di.get('ec');
+    ec.set('name', 'x');
+
+    function fn() {
+        return this.get('name') + 'y';
+    }
+
+    function fn2(name) {
+        return name + 'y' + this.getLast();
+    }
+
+    var obj = {
+        getLast: function () {
+            return 'z';
+        }
+    };
+
+    test.strictEqual(ec.execute(fn, []), 'xy');
+    test.strictEqual(ec.execute(fn2, [], obj), 'xyz');
+
+    test.done();
+};
+
 exports.testReadmeExamples = function (test) {
     var exdi = require(__dirname + '/../index.js');
     var myContainer = exdi.get('myContainer');
