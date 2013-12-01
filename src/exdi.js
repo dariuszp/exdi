@@ -2,6 +2,8 @@ if (typeof window !== 'undefined') {
     window.exdi = {};
 }
 
+// TODO: use name "exdiNext" to run async content
+
 (function (global) {
     'use strict';
 
@@ -62,7 +64,8 @@ if (typeof window !== 'undefined') {
          * @returns Container
          */
         this.set = function (name, value) {
-            if (name[0].toString().length === 0) {
+            name = String(name);
+            if (name.length === 0) {
                 throw new Error('Invalid name');
             }
             if (/^[A-Z]/.test(name[0].toString()) && typeof value !== 'function') {
@@ -79,7 +82,8 @@ if (typeof window !== 'undefined') {
          * @returns {*}
          */
         this.get = function (name, params, constructorContext) {
-            if (name[0].toString().length === 0) {
+            name = String(name);
+            if (name.length === 0) {
                 throw new Error('Invalid name');
             }
             if (/^[A-Z]/.test(name[0].toString()) && typeof container[name] === 'function') {
@@ -96,6 +100,7 @@ if (typeof window !== 'undefined') {
          * @param name
          */
         this.delete = function (name) {
+            name = String(name);
             delete container[name];
             return this;
         };
@@ -140,6 +145,7 @@ if (typeof window !== 'undefined') {
     var containers = {};
 
     global.get = function (name) {
+        name = String(name);
         if ((containers[name] instanceof Container) === false) {
             containers[name] = new Container();
         }
@@ -151,6 +157,7 @@ if (typeof window !== 'undefined') {
     };
 
     global.delete = function (name) {
+        name = String(name);
         delete containers[name];
         return this;
     };
