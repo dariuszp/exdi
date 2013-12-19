@@ -3,6 +3,11 @@ exdi [![Build Status](https://travis-ci.org/dariuszp/exdi.png?branch=master)](ht
 
 Dependency injection container for JavaScript
 
+## 1.1.6
+
+*BUGFIX*
+Mimified version was not generated
+
 ## 1.1.5
 
 Now you can select context for queue fn to run
