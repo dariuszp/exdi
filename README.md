@@ -3,7 +3,23 @@ exdi [![Build Status](https://travis-ci.org/dariuszp/exdi.png?branch=master)](ht
 
 Dependency injection container for JavaScript
 
+## 1.1.5
+
+Now you can select context for queue fn to run
+
+```JavaScript
+queue.add(function (exdiDone, age) {
+    this.set('name', 'Dariusz');
+    this.set('age', age || 0);
+    exdiDone();
+}, {
+    age: 26
+},
+myObject);
+```
+
 ## 1.1.4
+
 Container queue added. Now you can create queue of async functions that will be executed using container as context.
 This feature is experimental.
 Usage:

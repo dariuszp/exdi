@@ -7,7 +7,7 @@ var queue = container.createQueue();
 
 container.set('MyConstructor', function () {
     return 'And this is my constructor example. Hehe :]';
-})
+});
 
 queue.add(function (exdiDone, age) {
     this.set('name', 'Dariusz');
@@ -20,6 +20,13 @@ queue.add(function (exdiDone, age) {
 queue.add(function (exdiDone) {
     this.set('surname', 'Półtorak');
     exdiDone();
+});
+
+queue.add(function (exdiDone) {
+    console.log(this.x);
+    exdiDone();
+}, {}, {
+    x: 'custom context test'
 });
 
 queue.add(function (exdiDone, MyConstructor) {

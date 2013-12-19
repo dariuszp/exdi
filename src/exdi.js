@@ -56,27 +56,39 @@ if (typeof window !== 'undefined') {
             if (list[i] && i < list.length && typeof list[i].fn === 'function') {
                 i++;
                 list[i-1].params.exdiDone = exdiDone;
-                container.execute(list[i-1].fn, list[i-1].params, container)
+                container.execute(list[i-1].fn, list[i-1].params, list[i-1].context || container)
             }
         };
 
 
-        this.add = function (fn, params) {
+        this.add = function (fn, params, context) {
             if (typeof fn !== 'function') {
                 throw new Error('You can add only functions to queue');
             }
             if ((params instanceof Object) === false) {
                 params = {};
             }
+            if (!context || !(context instanceof Object)) {
+                context = undefined;
+            }
             list.push({
                 fn: fn,
-                params: params
+                params: params,
+                context: context
             });
+            return this;
+        };
+
+
+        this.clearQueue = function () {
+            list = [];
+            return this;
         };
 
 
         this.execute = function () {
             exdiDone();
+            return this;
         };
 
 
@@ -211,4 +223,5 @@ if (typeof window !== 'undefined') {
     global.create = function () {
         return new Container();
     };
+
 })(typeof window === 'undefined' ? module.exports : window.exdi);
