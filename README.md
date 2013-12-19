@@ -3,6 +3,43 @@ exdi [![Build Status](https://travis-ci.org/dariuszp/exdi.png?branch=master)](ht
 
 Dependency injection container for JavaScript
 
+## 1.1.4
+Container queue added. Now you can create queue of async functions that will be executed using container as context.
+This feature is experimental.
+Usage:
+
+```JavaScript
+var exdi = require('exdi');
+
+var container = exdi.create();
+var queue = container.createQueue();
+
+container.set('MyConstructor', function () {
+    return 'And this is my constructor example. Hehe :]';
+})
+
+queue.add(function (exdiDone, age) {
+    this.set('name', 'Dariusz');
+    this.set('age', age || 0);
+    exdiDone();
+}, {
+    age: 26
+});
+
+queue.add(function (exdiDone) {
+    this.set('surname', 'Półtorak');
+    exdiDone();
+});
+
+queue.add(function (exdiDone, MyConstructor) {
+    console.log(this.get('name') + ' ' + this.get('surname') + ', age: ' + this.get('age'));
+    console.log(MyConstructor);
+    exdiDone();
+});
+
+queue.run();
+```
+
 ## 1.1.2
 
 * fixes .execute(). Now there is a third parameter - execution context. If no context object is provided, function is executed using container as context.

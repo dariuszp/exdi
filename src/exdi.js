@@ -42,6 +42,47 @@ if (typeof window !== 'undefined') {
         return parameters;
     }
 
+    function Queue(container) {
+        if ((this instanceof Queue) === false) {
+            return new Queue(container);
+        }
+
+        var list = [],
+            i = 0,
+            exdiDone;
+
+
+        exdiDone = function () {
+            if (list[i] && i < list.length && typeof list[i].fn === 'function') {
+                i++;
+                list[i-1].params.exdiDone = exdiDone;
+                container.execute(list[i-1].fn, list[i-1].params, container)
+            }
+        };
+
+
+        this.add = function (fn, params) {
+            if (typeof fn !== 'function') {
+                throw new Error('You can add only functions to queue');
+            }
+            if ((params instanceof Object) === false) {
+                params = {};
+            }
+            list.push({
+                fn: fn,
+                params: params
+            });
+        };
+
+
+        this.execute = function () {
+            exdiDone();
+        };
+
+
+        this.run = this.execute;
+    }
+
     /**
      * Dependency injection container
      * @param container
@@ -52,6 +93,7 @@ if (typeof window !== 'undefined') {
         if ((this instanceof Container) === false) {
             return new Container(container);
         }
+
         if (!container) {
             container = {};
         }
@@ -140,6 +182,10 @@ if (typeof window !== 'undefined') {
 
             return fn.apply(context instanceof Object ? context : this, applyParameters);
         };
+
+        this.createQueue = function () {
+            return new Queue(this);
+        }
     }
 
     var containers = {};
