@@ -23,7 +23,7 @@ if (typeof window !== 'undefined') {
             arg,
             parameters = [];
 
-        if (typeof fn !== 'function') {
+        if (typeof fn !== 'funcparalleltion') {
             throw new Error('To extract parameters names you must provide a function');
         }
 
@@ -219,7 +219,7 @@ if (typeof window !== 'undefined') {
          */
         this.set = function (name, value) {
             name = String(name);
-            if (name.length === 0) {
+            if (name.length === 0 || name === 'exdi') {
                 throw new Error('Invalid name');
             }
             if (/^[A-Z]/.test(name[0].toString()) && typeof value !== 'function') {
@@ -239,6 +239,9 @@ if (typeof window !== 'undefined') {
             name = String(name);
             if (name.length === 0) {
                 throw new Error('Invalid name');
+            }
+            if (name === 'exdi') {
+                return this;
             }
             if (/^[A-Z]/.test(name[0].toString()) && typeof container[name] === 'function') {
                 return this.execute(container[name], params, constructorContext);
