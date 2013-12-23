@@ -329,4 +329,14 @@ if (typeof window !== 'undefined') {
         return new Container();
     };
 
+    global.createContainer = global.create;
+
+    global.createQueue = function () {
+        return global.createContainer().createQueue();
+    };
+
+    global.createParallel = function () {
+        return global.createContainer().createParallel();
+    }
+
 })(typeof window === 'undefined' ? module.exports : window.exdi);
