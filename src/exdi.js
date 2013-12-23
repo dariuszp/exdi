@@ -2,8 +2,6 @@ if (typeof window !== 'undefined') {
     window.exdi = {};
 }
 
-// TODO: use name "exdiNext" to run async content
-
 (function (global) {
     'use strict';
 
