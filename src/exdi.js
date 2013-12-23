@@ -21,7 +21,7 @@ if (typeof window !== 'undefined') {
             arg,
             parameters = [];
 
-        if (typeof fn !== 'funcparalleltion') {
+        if (typeof fn !== 'function') {
             throw new Error('To extract parameters names you must provide a function');
         }
 
