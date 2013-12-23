@@ -124,7 +124,6 @@ if (typeof window !== 'undefined') {
 
             (function(taskName){
                 params.exdiDone = function () {
-                    console.log(taskName);
                     isDone[taskName] = true;
                     var allDone = true,
                         name = '';

@@ -12,9 +12,48 @@
             return x + y;
         });
         document.write(myContainer.get('Test'));
-        console.log(exdi);
-        console.log(myContainer);
-        console.log(exdi.get('test').get('x'));
+        document.write(' Check console for the rest ;]');
+
+        var q = myContainer.createQueue();
+        q.add(function (exdiDone) {
+            var c = this;
+            setTimeout(function () {
+                c.set('name', 'Dariusz');
+                exdiDone();
+            }, 1000);
+        });
+        q.add(function (exdiDone) {
+            this.set('surname', 'Półtorak');
+            exdiDone();
+        });
+        q.add(function (name, surname) {
+            console.log(name + ' ' + surname);
+        });
+        console.log('Expecting "Dariusz Półtorak after around 1 second');
+        q.execute();
+
+        var p = myContainer.createParallel();
+        p.add(function (exdiDone) {
+            var c = this;
+            setTimeout(function () {
+                c.set('one', 1);
+                exdiDone();
+            }, 1000);
+        });
+        p.add(function (exdiDone) {
+            var c = this;
+            setTimeout(function () {
+                c.set('two', 2);
+                exdiDone();
+            }, 2000);
+        });
+
+        p.on('done', function (one, two) {
+            console.log(one + two);
+        });
+
+        console.log('Expecting 3 after around 2 seconds')
+        p.execute();
     </script>
 </head>
 <body>
