@@ -42,6 +42,7 @@ if (typeof window !== 'undefined') {
         return parameters;
     }
 
+
     function Queue(container) {
         if ((this instanceof Queue) === false) {
             return new Queue(container);
@@ -94,6 +95,106 @@ if (typeof window !== 'undefined') {
 
         this.run = this.execute;
     }
+
+
+    function Parallel(container) {
+        if ((this instanceof Parallel) === false) {
+            return new Parallel(container);
+        }
+
+        var tasks           = {},
+            isDone          = {},
+            taskNr          = 0,
+            i               = 0,
+            stepListeners   = [],
+            doneListeners   = [];
+
+        this.add = function (fn, params, context) {
+            if (typeof fn !== 'function') {
+                throw new Error('You can add only functions to queue');
+            }
+            if ((params instanceof Object) === false) {
+                params = {};
+            }
+            if (!context || !(context instanceof Object)) {
+                context = undefined;
+            }
+
+            taskNr++;
+
+            (function(taskName){
+                params.exdiDone = function () {
+                    console.log(taskName);
+                    isDone[taskName] = true;
+                    var allDone = true,
+                        name = '';
+                    for (name in isDone) {
+                        if (isDone.hasOwnProperty(name)) {
+                            if (!isDone[name]) {
+                                allDone = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (!allDone) {
+                        for (i = 0; i < stepListeners.length; i++) {
+                            container.execute(stepListeners[i], {}, container);
+                        }
+                    } else {
+                        for (i = 0; i < doneListeners.length; i++) {
+                            container.execute(doneListeners[i], {}, container);
+                        }
+                    }
+                };
+
+                tasks[taskName] = {
+                    fn: fn,
+                    params: params,
+                    context: context
+                };
+                isDone[taskName] = false;
+            })('task' + String(taskNr));
+
+            return this;
+        };
+
+
+        this.clearTasks = function () {
+            tasks = {};
+            taskNr = 0;
+            return this;
+        };
+
+
+        this.on = function (event, callback) {
+            event = String(event).toLowerCase();
+            if (event !== 'step' && event !== 'done') {
+                throw new Error('Unrecognized event ' + String(event));
+            }
+            if (typeof callback !== 'function') {
+                throw new Error('Callback must be a function');
+            }
+            if (event === 'step') {
+                stepListeners.push(callback);
+            } else {
+                doneListeners.push(callback);
+            }
+            return this;
+        }
+
+
+        this.execute = function () {
+            var taskName = '';
+            for(taskName in tasks) {
+                container.execute(tasks[taskName].fn, tasks[taskName].params, tasks[taskName].context || container);
+            }
+            return this;
+        };
+
+
+        this.run = this.execute;
+    }
+
 
     /**
      * Dependency injection container
@@ -197,6 +298,10 @@ if (typeof window !== 'undefined') {
 
         this.createQueue = function () {
             return new Queue(this);
+        }
+
+        this.createParallel = function () {
+            return new Parallel(this);
         }
     }
 
