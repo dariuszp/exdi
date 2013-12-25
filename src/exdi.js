@@ -48,7 +48,10 @@ if (typeof window !== 'undefined') {
 
         var list = [],
             i = 0,
-            exdiDone;
+            exdiDone,
+            timeoutListeners    = [],
+            timeoutLimit        = 0,
+            clock               = false;
 
 
         exdiDone = function () {
@@ -56,6 +59,10 @@ if (typeof window !== 'undefined') {
                 i++;
                 list[i-1].params.exdiDone = exdiDone;
                 container.execute(list[i-1].fn, list[i-1].params, list[i-1].context || container)
+            } else {
+                if (clock) {
+                    clearTimeout(clock);
+                }
             }
         };
 
@@ -78,6 +85,22 @@ if (typeof window !== 'undefined') {
             return this;
         };
 
+        this.on = function (event, callback) {
+            event = String(event).toLowerCase();
+            if (event !== 'timeout') {
+                throw new Error('Unrecognized event ' + String(event));
+            }
+            if (typeof callback !== 'function') {
+                throw new Error('Callback must be a function');
+            }
+            if (event === 'timeout') {
+                timeoutListeners.push(callback);
+            } else {
+                throw new Error('Unrecognized event ' + event + '. Available events are: step, timeout and done.');
+            }
+            return this;
+        };
+
 
         this.clearQueue = function () {
             list = [];
@@ -87,6 +110,19 @@ if (typeof window !== 'undefined') {
 
         this.execute = function () {
             exdiDone();
+            if (timeoutLimit > 0) {
+                var c = this;
+                clock = setTimeout(function () {
+                    exdiDone = function () {
+                        return false;
+                        list = [];
+                        i = 0;
+                    }
+                    for (i = 0; i < timeoutListeners.length; i++) {
+                        container.execute(timeoutListeners[i], {}, container);
+                    }
+                }, timeoutLimit * 1000);
+            }
             return this;
         };
 
@@ -100,12 +136,15 @@ if (typeof window !== 'undefined') {
             return new Parallel(container);
         }
 
-        var tasks           = {},
-            isDone          = {},
-            taskNr          = 0,
-            i               = 0,
-            stepListeners   = [],
-            doneListeners   = [];
+        var tasks               = {},
+            isDone              = {},
+            taskNr              = 0,
+            i                   = 0,
+            stepListeners       = [],
+            doneListeners       = [],
+            timeoutListeners    = [],
+            timeoutLimit        = 0,
+            clock               = false;
 
         this.add = function (fn, params, context) {
             if (typeof fn !== 'function') {
@@ -122,12 +161,15 @@ if (typeof window !== 'undefined') {
 
             (function(taskName){
                 params.exdiDone = function () {
+                    if (isDone[taskName] !== false) {
+                        return;
+                    }
                     isDone[taskName] = true;
                     var allDone = true,
                         name = '';
                     for (name in isDone) {
                         if (isDone.hasOwnProperty(name)) {
-                            if (!isDone[name]) {
+                            if (isDone[name] === false) {
                                 allDone = false;
                                 break;
                             }
@@ -138,6 +180,9 @@ if (typeof window !== 'undefined') {
                             container.execute(stepListeners[i], {}, container);
                         }
                     } else {
+                        if (clock) {
+                            clearTimeout(clock);
+                        }
                         for (i = 0; i < doneListeners.length; i++) {
                             container.execute(doneListeners[i], {}, container);
                         }
@@ -165,7 +210,7 @@ if (typeof window !== 'undefined') {
 
         this.on = function (event, callback) {
             event = String(event).toLowerCase();
-            if (event !== 'step' && event !== 'done') {
+            if (event !== 'step' && event !== 'done' && event !== 'timeout') {
                 throw new Error('Unrecognized event ' + String(event));
             }
             if (typeof callback !== 'function') {
@@ -173,17 +218,37 @@ if (typeof window !== 'undefined') {
             }
             if (event === 'step') {
                 stepListeners.push(callback);
-            } else {
+            } else if (event === 'timeout') {
+                timeoutListeners.push(callback);
+            } else if (event === 'done') {
                 doneListeners.push(callback);
+            } else {
+                throw new Error('Unrecognized event ' + event + '. Available events are: step, timeout and done.');
             }
             return this;
-        }
+        };
+
+
+        this.setTimeoutLimit = function (seconds) {
+            timeoutLimit = Math.abs(parseInt(seconds, 10));
+        };
 
 
         this.execute = function () {
             var taskName = '';
             for(taskName in tasks) {
                 container.execute(tasks[taskName].fn, tasks[taskName].params, tasks[taskName].context || container);
+            }
+            if (timeoutLimit > 0) {
+                var c = this;
+                clock = setTimeout(function () {
+                    isDone = {};
+                    tasks = {};
+                    taskNr = 0;
+                    for (i = 0; i < timeoutListeners.length; i++) {
+                        container.execute(timeoutListeners[i], {}, container);
+                    }
+                }, timeoutLimit * 1000);
             }
             return this;
         };
@@ -325,11 +390,11 @@ if (typeof window !== 'undefined') {
         return this;
     };
 
-    global.create = function () {
+    global.createContainer = function () {
         return new Container();
     };
 
-    global.createContainer = global.create;
+    global.create = global.createContainer();
 
     global.createQueue = function () {
         return global.createContainer().createQueue();
