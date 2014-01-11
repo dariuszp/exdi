@@ -64,25 +64,17 @@ if (typeof window !== 'undefined') {
             clock               = false;
 
 
-        exdiDone = function (fn, params, context) {
+        exdiDone = function () {
             if (list[i] && i < list.length && typeof list[i].fn === 'function') {
                 i++;
                 list[i-1].params.exdiDone = exdiDone;
                 container.execute(list[i-1].fn, list[i-1].params, list[i-1].context || container, true);
+                return false;
             } else {
                 if (clock) {
                     clearTimeout(clock);
                 }
-                if (typeof fn !== 'function') {
-                    return;
-                }
-                if ((params instanceof Object) === false) {
-                    params = {};
-                }
-                if (!context || !(context instanceof Object)) {
-                    context = undefined;
-                }
-                container.execute(fn, params, context || container, true);
+                return true;
             }
         };
 
@@ -121,6 +113,10 @@ if (typeof window !== 'undefined') {
             return this;
         };
 
+        this.setTimeoutLimit = function (seconds) {
+            timeoutLimit = Math.abs(parseInt(seconds, 10));
+            return this;
+        };
 
         this.clearQueue = function () {
             list = [];
@@ -128,8 +124,9 @@ if (typeof window !== 'undefined') {
         };
 
 
-        this.execute = function (fn, params, context) {
-            exdiDone(fn, params, context);
+        this.execute = function () {
+            i = 0;
+            exdiDone();
             if (timeoutLimit > 0) {
                 var c = this;
                 clock = setTimeout(function () {
@@ -141,7 +138,7 @@ if (typeof window !== 'undefined') {
                     for (i = 0; i < timeoutListeners.length; i++) {
                         container.execute(timeoutListeners[i], {}, container, true);
                     }
-                }, timeoutLimit * 1000);
+                }, timeoutLimit);
             }
             return this;
         };
@@ -251,12 +248,14 @@ if (typeof window !== 'undefined') {
 
         this.setTimeoutLimit = function (seconds) {
             timeoutLimit = Math.abs(parseInt(seconds, 10));
+            return this;
         };
 
 
         this.execute = function () {
             var taskName = '';
             for(taskName in tasks) {
+                isDone[taskName] = false;
                 container.execute(tasks[taskName].fn, tasks[taskName].params, tasks[taskName].context || container, true);
             }
             if (timeoutLimit > 0) {
@@ -268,7 +267,7 @@ if (typeof window !== 'undefined') {
                     for (i = 0; i < timeoutListeners.length; i++) {
                         container.execute(timeoutListeners[i], {}, container, true);
                     }
-                }, timeoutLimit * 1000);
+                }, timeoutLimit);
             }
             return this;
         };

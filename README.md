@@ -3,6 +3,14 @@ exdi [![Build Status](https://travis-ci.org/dariuszp/exdi.png?branch=master)](ht
 
 Dependency injection container for JavaScript
 
+## 1.2.0
+
+* some bugfixing
+* timeout added
+* .execute() for both parallel and queue now have callback called on finish
+* .run() added as .execute() callback
+* all callbacks are called async by process.nextTick (node) or setTimeout (browser)
+
 ## 1.1.7
 
 New feature called parallel. Similar to Queue but all register callbacks are run at the same time, one after another using loop.

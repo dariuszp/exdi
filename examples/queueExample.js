@@ -24,7 +24,9 @@ queue.add(function (exdiDone) {
 
 queue.add(function (exdiDone) {
     console.log(this.x);
-    exdiDone();
+    setTimeout(function () {
+        exdiDone();
+    }, 3000);
 }, {}, {
     x: 'custom context test'
 });
@@ -35,4 +37,12 @@ queue.add(function (exdiDone, MyConstructor) {
     exdiDone();
 });
 
-queue.run();
+queue.on('timeout', function () {
+    console.log('timeout!');
+});
+
+queue.add(function () {
+    queue.execute();
+})
+
+queue.execute();

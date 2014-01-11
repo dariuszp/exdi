@@ -15,6 +15,8 @@ parallel.add(function (exdiDone) {
     }, 1000);
 });
 
+parallel.setTimeoutLimit(5000);
+
 parallel.add(function (exdiDone) {
     var c = this;
     setTimeout(function () {
@@ -29,6 +31,14 @@ parallel.on('step', function () {
 
 parallel.on('done', function (x,y,z) {
     console.log(x + y + z);
+});
+
+parallel.on('timeout', function () {
+    console.log('timeout');
+});
+
+parallel.on('done', function () {
+    parallel.execute();
 });
 
 parallel.execute();
