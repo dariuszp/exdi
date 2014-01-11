@@ -390,11 +390,11 @@ if (typeof window !== 'undefined') {
         return this;
     };
 
-    global.createContainer = function () {
+    global.create = function () {
         return new Container();
     };
 
-    global.create = global.createContainer();
+    global.createContainer = global.create;
 
     global.createQueue = function () {
         return global.createContainer().createQueue();
