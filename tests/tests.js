@@ -1,6 +1,6 @@
 'use strict';
 
-var di = require(__dirname + '/../index.js');
+var di = require(__dirname + '/../src/exdi.min.js');
 
 exports.mainReturnConstructors = function(test){
     test.ok(di instanceof Object, 'Main faile does not return Containers instance');

@@ -2,8 +2,18 @@ if (typeof window !== 'undefined') {
     window.exdi = {};
 }
 
-(function (global) {
+(function (global, isBrowser) {
     'use strict';
+
+    function runAsync(fn) {
+        if (isBrowser) {
+            setTimeout(function () {
+                fn();
+            });
+        } else {
+            process.nextTick(fn);
+        }
+    }
 
     /**
      * Extract parameter names from any function
@@ -54,15 +64,25 @@ if (typeof window !== 'undefined') {
             clock               = false;
 
 
-        exdiDone = function () {
+        exdiDone = function (fn, params, context) {
             if (list[i] && i < list.length && typeof list[i].fn === 'function') {
                 i++;
                 list[i-1].params.exdiDone = exdiDone;
-                container.execute(list[i-1].fn, list[i-1].params, list[i-1].context || container)
+                container.execute(list[i-1].fn, list[i-1].params, list[i-1].context || container, true);
             } else {
                 if (clock) {
                     clearTimeout(clock);
                 }
+                if (typeof fn !== 'function') {
+                    return;
+                }
+                if ((params instanceof Object) === false) {
+                    params = {};
+                }
+                if (!context || !(context instanceof Object)) {
+                    context = undefined;
+                }
+                container.execute(fn, params, context || container, true);
             }
         };
 
@@ -108,8 +128,8 @@ if (typeof window !== 'undefined') {
         };
 
 
-        this.execute = function () {
-            exdiDone();
+        this.execute = function (fn, params, context) {
+            exdiDone(fn, params, context);
             if (timeoutLimit > 0) {
                 var c = this;
                 clock = setTimeout(function () {
@@ -119,7 +139,7 @@ if (typeof window !== 'undefined') {
                         i = 0;
                     }
                     for (i = 0; i < timeoutListeners.length; i++) {
-                        container.execute(timeoutListeners[i], {}, container);
+                        container.execute(timeoutListeners[i], {}, container, true);
                     }
                 }, timeoutLimit * 1000);
             }
@@ -177,14 +197,14 @@ if (typeof window !== 'undefined') {
                     }
                     if (!allDone) {
                         for (i = 0; i < stepListeners.length; i++) {
-                            container.execute(stepListeners[i], {}, container);
+                            container.execute(stepListeners[i], {}, container, true);
                         }
                     } else {
                         if (clock) {
                             clearTimeout(clock);
                         }
                         for (i = 0; i < doneListeners.length; i++) {
-                            container.execute(doneListeners[i], {}, container);
+                            container.execute(doneListeners[i], {}, container, true);
                         }
                     }
                 };
@@ -237,7 +257,7 @@ if (typeof window !== 'undefined') {
         this.execute = function () {
             var taskName = '';
             for(taskName in tasks) {
-                container.execute(tasks[taskName].fn, tasks[taskName].params, tasks[taskName].context || container);
+                container.execute(tasks[taskName].fn, tasks[taskName].params, tasks[taskName].context || container, true);
             }
             if (timeoutLimit > 0) {
                 var c = this;
@@ -246,7 +266,7 @@ if (typeof window !== 'undefined') {
                     tasks = {};
                     taskNr = 0;
                     for (i = 0; i < timeoutListeners.length; i++) {
-                        container.execute(timeoutListeners[i], {}, container);
+                        container.execute(timeoutListeners[i], {}, container, true);
                     }
                 }, timeoutLimit * 1000);
             }
@@ -329,9 +349,10 @@ if (typeof window !== 'undefined') {
          * Execute given function using container parameters
          * @param fn
          * @param params
+         * @param async - default false - run function async
          * @returns {*}
          */
-        this.execute = function (fn, params, context) {
+        this.execute = function (fn, params, context, async) {
             if (!params) {
                 params = [];
             }
@@ -358,8 +379,12 @@ if (typeof window !== 'undefined') {
                 }
             }
 
-            return fn.apply(context instanceof Object ? context : this, applyParameters);
+            context = context instanceof Object ? context : this;
+
+            return async === true ? runAsync(function () { fn.apply(context, applyParameters); }) : fn.apply(context, applyParameters);
         };
+
+        this.run = this.execute;
 
         this.createQueue = function () {
             return new Queue(this);
@@ -404,4 +429,4 @@ if (typeof window !== 'undefined') {
         return global.createContainer().createParallel();
     }
 
-})(typeof window === 'undefined' ? module.exports : window.exdi);
+})(typeof window === 'undefined' ? module.exports : window.exdi, typeof window === 'undefined' ? false : true);
