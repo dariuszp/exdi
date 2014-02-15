@@ -39,7 +39,7 @@ exports.containerConstructorAcceptFunctions = function (test) {
 exports.containerConstructorFailIfValueIsNotAConstructor = function (test) {
     var myFailedConstructorContainer = di.get('myFailedConstructorContainer');
     test.throws(function () {
-        myConstructorContainer.set('Test', 5);
+        myFailedConstructorContainer.set('Test', 5);
     }, undefined, 'If parameters name start with capital letter you must provide constructor function as value');
     test.done();
 };
