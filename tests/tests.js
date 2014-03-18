@@ -286,3 +286,63 @@ exports.testReadmeExamples = function (test) {
     test.strictEqual(myContainer2.get('Test'), 3, 'Example 9');
     test.done();
 };
+
+exports.testExecuteAcceptArray = function (test) {
+    var c = di.create();
+    c.set('name', 'Darek');
+    c.set('surname', 'Półtorak');
+    c.execute(function (surname, name) {
+        test.strictEqual(surname, 'Półtorak');
+    });
+
+    c.execute(['surname', 'name', function (a, b) {
+        test.strictEqual(a, 'Półtorak');
+    }]);
+
+    test.done();
+}
+
+exports.containerConstructorAcceptArrays = function (test) {
+    var mySuccessConstructorContainer = di.create();
+    test.doesNotThrow(function () {
+        mySuccessConstructorContainer.set('Test', [function () {}]);
+    }, undefined, 'Container accept only arrays as constructor');
+    test.done();
+};
+
+exports.constructorArrayUseContainerParameters = function (test) {
+    var parametersConstructor = di.create();
+    parametersConstructor.set('myValue', 'exdi');
+    parametersConstructor.set('Builder', ['myValue', function (myValueElse) {
+        return 'This is ' + myValueElse;
+    }]);
+    test.strictEqual(parametersConstructor.get('Builder'), 'This is exdi', 'Builder does not use container parameters');
+    test.done();
+};
+
+exports.overwriteExecuteParametersOfArray = function (test) {
+    var overwriteContainer = di.create();
+    overwriteContainer.set('x', 1);
+    overwriteContainer.set('y', 2);
+
+    function add(x1, y1) {
+        return x1 + y1;
+    }
+
+    test.strictEqual(overwriteContainer.execute(['x', 'y', add]), 3, 'Execute did not extract parameters from container');
+    test.strictEqual(overwriteContainer.execute(['x', 'y', add], {
+        x: 2
+    }), 4, 'Execute did not overwrite container parameter');
+    test.strictEqual(overwriteContainer.execute(['x', 'y', add], {
+        x: 2,
+        y: 8
+    }), 10, 'Execute did not overwrite both container parameter');
+
+    function add2(x1, y1, z1) {
+        return x1 + y1 + z1;
+    }
+    test.strictEqual(overwriteContainer.execute(['x', 'y', 'z', add2], {
+        z: 5
+    }), 8, 'Adding another parameter did not worked');
+    test.done();
+}

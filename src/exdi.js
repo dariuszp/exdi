@@ -5,6 +5,10 @@ if (typeof window !== 'undefined') {
 (function (global, isBrowser) {
     'use strict';
 
+    function isValidCaller(fn) {
+        return (typeof fn === 'function' || (typeof fn === 'object' && fn instanceof Array && fn.length > 0 && typeof fn[fn.length - 1] === 'function')) ? true : false;
+    }
+
     function runAsync(fn) {
         if (isBrowser) {
             setTimeout(function () {
@@ -19,17 +23,26 @@ if (typeof window !== 'undefined') {
      * Extract parameter names from any function
      */
     function getFunctionParametersNames(fn) {
+        var parameters = [], i = 0;
+
+        if (fn instanceof Array) {
+            var i;
+            for (i = 0; i < fn.length - 1; i++) {
+                if (!(typeof fn[i] === 'string' || (typeof fn[i] === number && !isNaN(fn[i]) && isFinite(fn[i])))) {
+                    throw new Error('Invalid array argument for getFunctionParametersNames(): ' + String(fn[i]));
+                }
+                parameters.push(String(fn[i]));
+            }
+            return parameters;
+        }
+
         var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m,
             FN_ARG_SPLIT = /\s*,\s*/,
-            FN_ARG = /^\s*(_?)(.+?)\1\s*$/,
             STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
 
-        var i = 0,
-            fnText,
+        var fnText,
             argDecl,
-            args,
-            arg,
-            parameters = [];
+            args;
 
         if (typeof fn !== 'function') {
             throw new Error('To extract parameters names you must provide a function');
@@ -65,7 +78,7 @@ if (typeof window !== 'undefined') {
 
 
         exdiDone = function () {
-            if (list[i] && i < list.length && typeof list[i].fn === 'function') {
+            if (list[i] && i < list.length && typeof isValidCaller(list[i].fn)) {
                 i++;
                 list[i-1].params.exdiDone = exdiDone;
                 container.execute(list[i-1].fn, list[i-1].params, list[i-1].context || container, true);
@@ -80,8 +93,8 @@ if (typeof window !== 'undefined') {
 
 
         this.add = function (fn, params, context) {
-            if (typeof fn !== 'function') {
-                throw new Error('You can add only functions to queue');
+            if (isValidCaller(fn)) {
+                throw new Error('You can add only functions or array to queue');
             }
             if ((params instanceof Object) === false) {
                 params = {};
@@ -102,7 +115,7 @@ if (typeof window !== 'undefined') {
             if (event !== 'timeout') {
                 throw new Error('Unrecognized event ' + String(event));
             }
-            if (typeof callback !== 'function') {
+            if (isValidCaller(callback)) {
                 throw new Error('Callback must be a function');
             }
             if (event === 'timeout') {
@@ -164,7 +177,7 @@ if (typeof window !== 'undefined') {
             clock               = false;
 
         this.add = function (fn, params, context) {
-            if (typeof fn !== 'function') {
+            if (isValidCaller(fn)) {
                 throw new Error('You can add only functions to queue');
             }
             if ((params instanceof Object) === false) {
@@ -230,7 +243,7 @@ if (typeof window !== 'undefined') {
             if (event !== 'step' && event !== 'done' && event !== 'timeout') {
                 throw new Error('Unrecognized event ' + String(event));
             }
-            if (typeof callback !== 'function') {
+            if (isValidCaller(callback)) {
                 throw new Error('Callback must be a function');
             }
             if (event === 'step') {
@@ -304,7 +317,7 @@ if (typeof window !== 'undefined') {
             if (name.length === 0 || name === 'exdi') {
                 throw new Error('Invalid name');
             }
-            if (/^[A-Z]/.test(name[0].toString()) && typeof value !== 'function') {
+            if (/^[A-Z]/.test(name[0].toString()) && !isValidCaller(value)) {
                 throw new Error('All variables named using first capital letter are constructors and must have first capital letter.');
             }
             container[name] = value;
@@ -325,7 +338,7 @@ if (typeof window !== 'undefined') {
             if (name === 'exdi') {
                 return this;
             }
-            if (/^[A-Z]/.test(name[0].toString()) && typeof container[name] === 'function') {
+            if (/^[A-Z]/.test(name[0].toString()) && isValidCaller(container[name])) {
                 return this.execute(container[name], params, constructorContext);
             }
             if (container[name] === undefined) {
@@ -355,13 +368,15 @@ if (typeof window !== 'undefined') {
             if (!params) {
                 params = [];
             }
-            if (typeof fn !== 'function') {
+
+            if (!isValidCaller(fn)) {
                 throw new Error('You can only execute a function');
             }
 
-            var fnParametersNames = [],
+            var fnParametersNames,
                 applyParameters = [],
-                i = 0;
+                i = 0,
+                isArray = (fn instanceof Array) ? true : false;
 
             fnParametersNames = getFunctionParametersNames(fn);
             if (fnParametersNames.length > 0) {
@@ -380,6 +395,9 @@ if (typeof window !== 'undefined') {
 
             context = context instanceof Object ? context : this;
 
+            if (isArray) {
+                fn = fn[fn.length - 1];
+            }
             return async === true ? runAsync(function () { fn.apply(context, applyParameters); }) : fn.apply(context, applyParameters);
         };
 
