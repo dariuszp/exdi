@@ -3,6 +3,39 @@ exdi [![Build Status](https://travis-ci.org/dariuszp/exdi.png?branch=master)](ht
 
 Dependency injection container for JavaScript
 
+## 1.3.0
+
+* now ALL methods accept arrays or functions to handle minified javascript
+
+Problem. This code will fail if we minify JavaScript:
+```JavaScript
+container.set('surname', 'Półtorak');
+container.execute(function (name, surname) { console.log(surname); });
+```
+
+because output will be something like this:
+```JavaScript
+a.set('surname', 'Półtorak');
+a.execute(function (b, c) { console.log(c); });
+```
+
+exdi will try to match container using "c" as name. There is no such variable.
+So if we think that our code will be minified, we should use syntax like that:
+```JavaScript
+container.set('surname', 'Półtorak');
+container.execute(['name', 'surname', function (name, surname) { console.log(surname); }]);
+```
+
+so mimified code will look like this:
+```JavaScript
+a.set('surname', 'Półtorak');
+a.execute(['name', 'surname', function (b, c) { console.log(c); }]);
+```
+
+Mimifiers do not change strings. This way exdi can match variable name from array with function arguments.
+Just remember that exdi accept only non-empty array with last argument to be function.
+And every element before that function should be string or valid number (finite, not NaN).
+
 ## 1.2.0
 
 * some bugfixing
