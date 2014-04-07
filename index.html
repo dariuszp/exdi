@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Exdi : Dependency injection container for JavaScript" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Exdi</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/dariuszp/exdi">View on GitHub</a>
+
+          <h1 id="project_title">Exdi</h1>
+          <h2 id="project_tagline">Dependency injection container for JavaScript</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/dariuszp/exdi/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/dariuszp/exdi/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="exdi-" class="anchor" href="#exdi-"><span class="octicon octicon-link"></span></a>exdi <a href="https://travis-ci.org/dariuszp/exdi"><img src="https://travis-ci.org/dariuszp/exdi.png?branch=master" alt="Build Status"></a>
+</h1>
+
+<p>Dependency injection container for JavaScript</p>
+
+<h2>
+<a name="130" class="anchor" href="#130"><span class="octicon octicon-link"></span></a>1.3.0</h2>
+
+<ul>
+<li>now ALL methods accept arrays or functions to handle minified javascript</li>
+</ul><p>Problem. This code will fail if we minify JavaScript:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">container</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'surname'</span><span class="p">,</span> <span class="s1">'Półtorak'</span><span class="p">);</span>
+<span class="nx">container</span><span class="p">.</span><span class="nx">execute</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">surname</span><span class="p">)</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">surname</span><span class="p">);</span> <span class="p">});</span>
+</pre></div>
+
+<p>because output will be something like this:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">a</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'surname'</span><span class="p">,</span> <span class="s1">'Półtorak'</span><span class="p">);</span>
+<span class="nx">a</span><span class="p">.</span><span class="nx">execute</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">c</span><span class="p">)</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">c</span><span class="p">);</span> <span class="p">});</span>
+</pre></div>
+
+<p>exdi will try to match container using "c" as name. There is no such variable.
+So if we think that our code will be minified, we should use syntax like that:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">container</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'surname'</span><span class="p">,</span> <span class="s1">'Półtorak'</span><span class="p">);</span>
+<span class="nx">container</span><span class="p">.</span><span class="nx">execute</span><span class="p">([</span><span class="s1">'name'</span><span class="p">,</span> <span class="s1">'surname'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">surname</span><span class="p">)</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">surname</span><span class="p">);</span> <span class="p">}]);</span>
+</pre></div>
+
+<p>so mimified code will look like this:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">a</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'surname'</span><span class="p">,</span> <span class="s1">'Półtorak'</span><span class="p">);</span>
+<span class="nx">a</span><span class="p">.</span><span class="nx">execute</span><span class="p">([</span><span class="s1">'name'</span><span class="p">,</span> <span class="s1">'surname'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">c</span><span class="p">)</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">c</span><span class="p">);</span> <span class="p">}]);</span>
+</pre></div>
+
+<p>Mimifiers do not change strings. This way exdi can match variable name from array with function arguments.
+Just remember that exdi accept only non-empty array with last argument to be function.
+And every element before that function should be string or valid number (finite, not NaN).</p>
+
+<h2>
+<a name="120" class="anchor" href="#120"><span class="octicon octicon-link"></span></a>1.2.0</h2>
+
+<ul>
+<li>some bugfixing</li>
+<li>timeout added</li>
+<li>.execute() for both parallel and queue now have callback called on finish</li>
+<li>.run() added as .execute() callback</li>
+<li>all callbacks are called async by process.nextTick (node) or setTimeout (browser)</li>
+</ul><h2>
+<a name="117" class="anchor" href="#117"><span class="octicon octicon-link"></span></a>1.1.7</h2>
+
+<p>New feature called parallel. Similar to Queue but all register callbacks are run at the same time, one after another using loop.
+Each callback have parameter exdiDone (as always, order of parameters does not matter).
+Task must call from inside function exdiDone passed in arguments (just like in queue).</p>
+
+<p>Each time callback call exdiDone, event is emitted. If it was last callback on the list, "done" event will be emitted. If not, "step" event.
+Just like in example.</p>
+
+<p><em>This feature is not fully tested</em>. Library passed all tests for container. There is no test coverage for queue and parallel.</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="s1">'use strict'</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">exdi</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">'/../src/exdi.js'</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">container</span> <span class="o">=</span> <span class="nx">exdi</span><span class="p">.</span><span class="nx">create</span><span class="p">();</span>
+<span class="nx">container</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'x'</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">parallel</span> <span class="o">=</span> <span class="nx">container</span><span class="p">.</span><span class="nx">createParallel</span><span class="p">();</span>
+
+<span class="nx">parallel</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">exdiDone</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+    <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+        <span class="nx">c</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'y'</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+        <span class="nx">exdiDone</span><span class="p">();</span>
+    <span class="p">},</span> <span class="mi">1000</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">parallel</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">exdiDone</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+    <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+        <span class="nx">c</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'z'</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+        <span class="nx">exdiDone</span><span class="p">();</span>
+    <span class="p">},</span> <span class="mi">3000</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">parallel</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'step'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'step done'</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">parallel</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'done'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">,</span><span class="nx">z</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">y</span> <span class="o">+</span> <span class="nx">z</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">parallel</span><span class="p">.</span><span class="nx">execute</span><span class="p">();</span>
+</pre></div>
+
+<h2>
+<a name="116" class="anchor" href="#116"><span class="octicon octicon-link"></span></a>1.1.6</h2>
+
+<p><em>BUGFIX</em>
+Mimified version was not generated</p>
+
+<h2>
+<a name="115" class="anchor" href="#115"><span class="octicon octicon-link"></span></a>1.1.5</h2>
+
+<p>Now you can select context for queue fn to run</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">queue</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">exdiDone</span><span class="p">,</span> <span class="nx">age</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'name'</span><span class="p">,</span> <span class="s1">'Dariusz'</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'age'</span><span class="p">,</span> <span class="nx">age</span> <span class="o">||</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="nx">exdiDone</span><span class="p">();</span>
+<span class="p">},</span> <span class="p">{</span>
+    <span class="nx">age</span><span class="o">:</span> <span class="mi">26</span>
+<span class="p">},</span>
+<span class="nx">myObject</span><span class="p">);</span>
+</pre></div>
+
+<h2>
+<a name="114" class="anchor" href="#114"><span class="octicon octicon-link"></span></a>1.1.4</h2>
+
+<p>Container queue added. Now you can create queue of async functions that will be executed using container as context.
+This feature is experimental.
+Usage:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="kd">var</span> <span class="nx">exdi</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'exdi'</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">container</span> <span class="o">=</span> <span class="nx">exdi</span><span class="p">.</span><span class="nx">create</span><span class="p">();</span>
+<span class="kd">var</span> <span class="nx">queue</span> <span class="o">=</span> <span class="nx">container</span><span class="p">.</span><span class="nx">createQueue</span><span class="p">();</span>
+
+<span class="nx">container</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'MyConstructor'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">'And this is my constructor example. Hehe :]'</span><span class="p">;</span>
+<span class="p">})</span>
+
+<span class="nx">queue</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">exdiDone</span><span class="p">,</span> <span class="nx">age</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'name'</span><span class="p">,</span> <span class="s1">'Dariusz'</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'age'</span><span class="p">,</span> <span class="nx">age</span> <span class="o">||</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="nx">exdiDone</span><span class="p">();</span>
+<span class="p">},</span> <span class="p">{</span>
+    <span class="nx">age</span><span class="o">:</span> <span class="mi">26</span>
+<span class="p">});</span>
+
+<span class="nx">queue</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">exdiDone</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'surname'</span><span class="p">,</span> <span class="s1">'Półtorak'</span><span class="p">);</span>
+    <span class="nx">exdiDone</span><span class="p">();</span>
+<span class="p">});</span>
+
+<span class="nx">queue</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">exdiDone</span><span class="p">,</span> <span class="nx">MyConstructor</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'name'</span><span class="p">)</span> <span class="o">+</span> <span class="s1">' '</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'surname'</span><span class="p">)</span> <span class="o">+</span> <span class="s1">', age: '</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'age'</span><span class="p">));</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">MyConstructor</span><span class="p">);</span>
+    <span class="nx">exdiDone</span><span class="p">();</span>
+<span class="p">});</span>
+
+<span class="nx">queue</span><span class="p">.</span><span class="nx">run</span><span class="p">();</span>
+</pre></div>
+
+<h2>
+<a name="112" class="anchor" href="#112"><span class="octicon octicon-link"></span></a>1.1.2</h2>
+
+<ul>
+<li>fixes .execute(). Now there is a third parameter - execution context. If no context object is provided, function is executed using container as context.</li>
+</ul><p>In other words, when you are executing function or getting "constructor" from container, this of that function will be pointing to given object or container itself.</p>
+
+<p>To do that, do:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">exdi</span><span class="p">.</span><span class="nx">execute</span><span class="p">(</span><span class="nx">myFunction</span><span class="p">,</span> <span class="p">[</span> <span class="nx">my</span><span class="o">:</span> <span class="s1">'params'</span> <span class="p">],</span> <span class="nx">someObject</span><span class="p">);</span>
+</pre></div>
+
+<p>or</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">exdi</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'SomeConstructor'</span><span class="p">,</span> <span class="p">[</span> <span class="nx">my</span><span class="o">:</span> <span class="s1">'params'</span> <span class="p">],</span> <span class="nx">someObject</span><span class="p">);</span>
+</pre></div>
+
+<p>where some object is... well some object and function under "SomeConstructor" will be called in the same way like this:
+someObject.someConstructor([ my: 'params' ]).</p>
+
+<h2>
+<a name="111" class="anchor" href="#111"><span class="octicon octicon-link"></span></a>1.1.1</h2>
+
+<p>To install exdi use</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">npm</span> <span class="nx">install</span> <span class="nx">exdi</span>
+</pre></div>
+
+<p>or add nesesery dependency into package.json and then execute </p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">npm</span> <span class="nx">install</span>
+</pre></div>
+
+<p>Then include exdi into your project.</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="kd">var</span> <span class="nx">exdi</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'exdi'</span><span class="p">);</span>
+</pre></div>
+
+<p>Now it is time to create your first container.</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="kd">var</span> <span class="nx">myContainer</span> <span class="o">=</span> <span class="nx">exdi</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'myContainer'</span><span class="p">);</span>
+</pre></div>
+
+<p>If you don't want container to be registered in exdi for some reason, you can always create anonymous container.</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="kd">var</span> <span class="nx">myNotRegisteredContainer</span> <span class="o">=</span> <span class="nx">exdi</span><span class="p">.</span><span class="nx">create</span><span class="p">();</span>
+</pre></div>
+
+<p>Now every time you execute <strong>exdi.get('myContainer');</strong> same container will be returned. If container under given name is not present, new container will be created. So <strong>watch out for misspells</strong>.
+Every time you use <strong>exdi.create();</strong> new container will be returned.</p>
+
+<p>Now to set value, you just need to use:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">myContainer</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'myValue'</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+</pre></div>
+
+<p>To get value use:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">myContainer</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'myValue'</span><span class="p">);</span> <span class="c1">// will return 5</span>
+</pre></div>
+
+<p>To make sure you don't get undefined value, set default value when you request parameter:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">myContainer</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'myMissingValue'</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span> <span class="c1">// will return 4</span>
+</pre></div>
+
+<p>Exdi follow simple convention.</p>
+
+<blockquote>
+<p>Every value name that starts with capital letter is a constructor. So only acceptable value is a <strong>function</strong>.
+Every value name that starts with small letter have simple value.
+Difference between constructos and other parameters is that constructors are execute every time you are trying to get them.</p>
+</blockquote>
+
+<p>So if you do something like this:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">myContainer</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'Builder'</span><span class="p">,</span> <span class="s1">'Hello world'</span><span class="p">);</span>
+</pre></div>
+
+<p>Exdi will <strong>throw an error</strong>.
+This will work:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">myContainer</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'Builder'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">'Hello world'</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="nx">myContainer</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'Builder'</span><span class="p">);</span> <span class="c1">// Hello world</span>
+</pre></div>
+
+<p>Builders can use all container parameters, including other builders.</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">myContainer</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'Builder'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">luckyNumber</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">'Lucky number '</span> <span class="o">+</span> <span class="nx">luckyNumber</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="nx">myContainer</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'luckyNumber'</span><span class="p">,</span> <span class="mi">7</span><span class="p">);</span>
+<span class="nx">myContainer</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'Builder'</span><span class="p">);</span> <span class="c1">// Lucky number 7</span>
+</pre></div>
+
+<p>or</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">myContainer</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'Builder'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">LuckyNumber</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">'Lucky number '</span> <span class="o">+</span> <span class="nx">LuckyNumber</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="nx">myContainer</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'LuckyNumber'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="s1">'IS 7'</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="nx">myContainer</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'Builder'</span><span class="p">);</span> <span class="c1">// Lucky number IS 7</span>
+</pre></div>
+
+<p>You can also execute any function with container parameters.</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="kd">function</span> <span class="nx">showX</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">x</span> <span class="o">+</span> <span class="s1">' '</span> <span class="o">+</span> <span class="nx">y</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nx">myContainer</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'x'</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+<span class="nx">myContainer</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'y'</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+<span class="nx">myContainer</span><span class="p">.</span><span class="nx">execute</span><span class="p">(</span><span class="nx">showXY</span><span class="p">);</span>
+</pre></div>
+
+<p>And if you need to overwrite one of the container parameters (or provide new), you can always pass object as second parameter of execute:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">myContainer</span><span class="p">.</span><span class="nx">execute</span><span class="p">(</span><span class="nx">showXY</span><span class="p">,</span> <span class="p">{</span>
+    <span class="nx">y</span><span class="o">:</span> <span class="mi">1</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>You can even have builders in builders:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">myContainer</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'One'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">'THIS'</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="nx">myContainer</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'Two'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">One</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">One</span> <span class="o">+</span> <span class="s1">' IS'</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="nx">myContainer</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'Three'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">Two</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">Two</span> <span class="o">+</span> <span class="s1">' SPARTA!'</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="nx">myContainer</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'Three'</span><span class="p">);</span> <span class="c1">// THIS IS SPARTA!</span>
+</pre></div>
+
+<p>And there is no reason why you should not have containers in containers:</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="nx">myContainer2</span> <span class="o">=</span> <span class="nx">exdi</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'myContainer2'</span><span class="p">);</span>
+<span class="nx">myContainer</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'x'</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="nx">myContainer2</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'x'</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+
+<span class="nx">myContainer2</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'c'</span><span class="p">,</span> <span class="nx">myContainer</span><span class="p">);</span>
+
+<span class="nx">myContainer2</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">'Test'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">c</span><span class="p">,</span> <span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">x</span> <span class="o">+</span> <span class="nx">c</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'x'</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">myContainer2</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">'Test'</span><span class="p">);</span> <span class="c1">// Should be 3</span>
+</pre></div>
+
+<p>Quite useful if you ask me.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Exdi maintained by <a href="https://github.com/dariuszp">dariuszp</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
