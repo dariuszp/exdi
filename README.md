@@ -188,8 +188,10 @@ function soSomethingCool(x, y, exdiDone) {
 }
 
 queue.add(soSomethingCool);
+queue.add(soSomethingCool); // again
 // or
 parallel.add(soSomethingCool);
+parallel.add(soSomethingCool); // again if you want
 ```
 
 to run either of them, you can use:
@@ -224,7 +226,7 @@ To cancel execution of both tools, use:
 
 ```JavaScript
 queue.clearQueue(); // clear queue, function currently in execution will finish but next one will not be fired
-queue.clearTasks(); // function can finish but step and done event wont called
+parallel.clearTasks(); // function can finish but step and done event wont called
 ```
 
 ### Minified code
