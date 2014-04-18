@@ -212,8 +212,10 @@ and will also report using events that all steps are finished.</p>
 <span class="p">}</span>
 
 <span class="nx">queue</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">soSomethingCool</span><span class="p">);</span>
+<span class="nx">queue</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">soSomethingCool</span><span class="p">);</span> <span class="c1">// again</span>
 <span class="c1">// or</span>
 <span class="nx">parallel</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">soSomethingCool</span><span class="p">);</span>
+<span class="nx">parallel</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">soSomethingCool</span><span class="p">);</span> <span class="c1">// again if you want</span>
 </pre></div>
 
 <p>to run either of them, you can use:</p>
@@ -244,7 +246,7 @@ call:</p>
 </ul><p>To cancel execution of both tools, use:</p>
 
 <div class="highlight highlight-JavaScript"><pre><span class="nx">queue</span><span class="p">.</span><span class="nx">clearQueue</span><span class="p">();</span> <span class="c1">// clear queue, function currently in execution will finish but next one will not be fired</span>
-<span class="nx">queue</span><span class="p">.</span><span class="nx">clearTasks</span><span class="p">();</span> <span class="c1">// function can finish but step and done event wont called</span>
+<span class="nx">parallel</span><span class="p">.</span><span class="nx">clearTasks</span><span class="p">();</span> <span class="c1">// function can finish but step and done event wont called</span>
 </pre></div>
 
 <h3>
