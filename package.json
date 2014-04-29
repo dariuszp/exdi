@@ -1,29 +1,32 @@
 {
-    "name": "exdi",
-    "version": "1.3.2",
-    "description": "Dependency injection container",
-    "main": "index.js",
-    "scripts": {
-        "test": "nodeunit ./tests/tests.js"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git@github.com:dariuszp/exdi.git"
-    },
-    "devDependencies": {
-        "nodeunit": "*"
-    },
-    "keywords": [
-        "dependency",
-        "injection",
-        "di",
-        "container",
-        "parallel",
-        "queue"
-    ],
-    "author": "Półtorak Dariusz",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/dariuszp/exdi/issues"
-    }
+  "name": "exdi",
+  "version": "1.4.0",
+  "description": "Dependency injection container",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodeunit ./tests/tests.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:dariuszp/exdi.git"
+  },
+  "devDependencies": {
+    "nodeunit": "*",
+    "gulp": "3.*",
+    "gulp-uglify": "*",
+    "gulp-rename": "^1.2.0"
+  },
+  "keywords": [
+    "dependency",
+    "injection",
+    "di",
+    "container",
+    "parallel",
+    "queue"
+  ],
+  "author": "Półtorak Dariusz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dariuszp/exdi/issues"
+  }
 }
