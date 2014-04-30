@@ -1,6 +1,6 @@
 {
   "name": "exdi",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Dependency injection container",
   "main": "index.js",
   "scripts": {
@@ -11,10 +11,10 @@
     "url": "git@github.com:dariuszp/exdi.git"
   },
   "devDependencies": {
-    "nodeunit": "*",
+    "nodeunit": "0.*",
     "gulp": "3.*",
     "gulp-uglify": "*",
-    "gulp-rename": "^1.2.0"
+    "gulp-rename": "1.*"
   },
   "keywords": [
     "dependency",
