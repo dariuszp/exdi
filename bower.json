@@ -1,7 +1,7 @@
 {
     "name": "exdi",
     "main": "src/exdi.min.js",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "homepage": "http://dariuszp.github.io/exdi/",
     "authors": [
         "Półtorak <poltorak.dariusz@gmail.com>"
