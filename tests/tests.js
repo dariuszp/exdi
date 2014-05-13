@@ -2,7 +2,7 @@
 
 var di = require(__dirname + '/../src/exdi.min.js');
 
-exports.mainReturnConstructors = function(test){
+exports.mainReturnConstructors = function (test) {
     test.ok(di instanceof Object, 'Main faile does not return Containers instance');
     test.done();
 };
@@ -31,7 +31,8 @@ exports.containersGetReturnSameContainerSecondTime = function (test) {
 exports.containerConstructorAcceptFunctions = function (test) {
     var mySuccessConstructorContainer = di.get('mySuccessConstructorContainer');
     test.doesNotThrow(function () {
-        mySuccessConstructorContainer.set('Test', function () {});
+        mySuccessConstructorContainer.set('Test', function () {
+        });
     }, undefined, 'Container accept only functions as constructor');
     test.done();
 };
@@ -46,14 +47,18 @@ exports.containerConstructorFailIfValueIsNotAConstructor = function (test) {
 
 exports.specialCharactersAreNotConstructors = function (test) {
     var mySpecialCharContainer = di.get('mySpecialCharContainer');
-    mySpecialCharContainer.set('_test', function () { return 'Test'; });
+    mySpecialCharContainer.set('_test', function () {
+        return 'Test';
+    });
     test.strictEqual(typeof mySpecialCharContainer.get('_test'), 'function', 'Special characters should not trigger construction');
     test.done();
 };
 
 exports.smallLetterValuesDoesNotExecuteFunctions = function (test) {
     var mySmallValueContainer = di.get('mySmallValueContainer');
-    mySmallValueContainer.set('test', function () { return 1; });
+    mySmallValueContainer.set('test', function () {
+        return 1;
+    });
     test.ok(typeof mySmallValueContainer.get('test') === 'function', 'Small letter parameters should not execute functions');
     test.done();
 };
@@ -183,11 +188,12 @@ exports.overwriteExecuteParameters = function (test) {
     function add2(x, y, z) {
         return x + y + z;
     }
+
     test.strictEqual(overwriteContainer.execute(add2, {
         z: 5
     }), 8, 'Adding another parameter did not worked');
     test.done();
-}
+};
 
 exports.executionContext = function (test) {
     var ec = di.get('ec');
@@ -305,7 +311,8 @@ exports.testExecuteAcceptArray = function (test) {
 exports.containerConstructorAcceptArrays = function (test) {
     var mySuccessConstructorContainer = di.create();
     test.doesNotThrow(function () {
-        mySuccessConstructorContainer.set('Test', [function () {}]);
+        mySuccessConstructorContainer.set('Test', [function () {
+        }]);
     }, undefined, 'Container accept only arrays as constructor');
     test.done();
 };
@@ -341,8 +348,60 @@ exports.overwriteExecuteParametersOfArray = function (test) {
     function add2(x1, y1, z1) {
         return x1 + y1 + z1;
     }
+
     test.strictEqual(overwriteContainer.execute(['x', 'y', 'z', add2], {
         z: 5
     }), 8, 'Adding another parameter did not worked');
     test.done();
 }
+
+this.useStringAsKey = function (test) {
+    var stringContainer = di.create();
+    stringContainer.set('x', 1);
+    stringContainer.set('y', 2);
+
+    stringContainer.set('add', function (x, y) {
+        return x + y;
+    });
+
+    stringContainer.set('CreateAdd', function () {
+        return function (x, y) {
+            return x + y + 1;
+        };
+    });
+
+    test.strictEqual(stringContainer.execute('add'), 3, 'Executing registered function');
+    test.strictEqual(stringContainer.execute('CreateAdd'), 4, 'Executing registered builder');
+
+    test.strictEqual(stringContainer.execute(['x', 'y', 'add']), 3, 'Executing registered function in array');
+    test.strictEqual(stringContainer.execute(['x', 'y', 'CreateAdd']), 4, 'Executing registered builder in array');
+
+    test.done();
+};
+
+this.constructTest = function (test) {
+
+    var constructContainer = di.create();
+    constructContainer.set('px', 1);
+    constructContainer.set('py', 2);
+
+    var c1 = constructContainer.construct(function (px, py) {
+        this.x = px * 2;
+        this.y = py * 2;
+    }, { py: 5 });
+
+    test.strictEqual(c1.x, 2, 'Constructed object x = 2');
+    test.strictEqual(c1.y, 10, 'Constructed object y = 10');
+
+    constructContainer.set('testC', function (px, py) {
+        this.x = px * 2;
+        this.y = py * 2;
+    });
+
+    var c2 = constructContainer.construct('testC');
+
+    test.strictEqual(c2.x, 2, 'Constructed object x = 2');
+    test.strictEqual(c2.y, 4, 'Constructed object y = 10');
+
+    test.done();
+};
