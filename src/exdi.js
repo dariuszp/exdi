@@ -6,17 +6,25 @@ if (typeof window !== 'undefined') {
     'use strict';
 
     function isValidCaller(fn) {
-        return (typeof fn === 'function' || (typeof fn === 'object' && fn instanceof Array && fn.length > 0 && typeof fn[fn.length - 1] === 'function')) ? true : false;
+        return ((typeof fn === 'function') || (typeof fn === 'object' && fn instanceof Array && fn.length > 0 && typeof fn[fn.length - 1] === 'function'));
     }
 
     function runAsync(fn) {
-        if (isBrowser) {
-            setTimeout(function () {
-                fn();
-            });
-        } else {
+        if (!isBrowser) {
             process.nextTick(fn);
+        } else {
+            window.setTimeout(function () {
+                fn();
+            }, 1);
         }
+    }
+
+    function construct(constructor, args) {
+        function F() {
+            return constructor.apply(this, args);
+        }
+        F.prototype = constructor.prototype;
+        return new F();
     }
 
     /**
@@ -26,9 +34,8 @@ if (typeof window !== 'undefined') {
         var parameters = [], i = 0;
 
         if (fn instanceof Array) {
-            var i;
             for (i = 0; i < fn.length - 1; i++) {
-                if (!(typeof fn[i] === 'string' || (typeof fn[i] === number && !isNaN(fn[i]) && isFinite(fn[i])))) {
+                if (!(typeof fn[i] === 'string' || (typeof fn[i] === 'number' && !isNaN(fn[i]) && isFinite(fn[i])))) {
                     throw new Error('Invalid array argument for getFunctionParametersNames(): ' + String(fn[i]));
                 }
                 parameters.push(String(fn[i]));
@@ -74,26 +81,27 @@ if (typeof window !== 'undefined') {
             exdiDone,
             timeoutListeners    = [],
             timeoutLimit        = 0,
-            clock               = false;
+            clock;
 
 
         exdiDone = function () {
+            var result = false;
             if (list[i] && i < list.length && typeof isValidCaller(list[i].fn)) {
                 i++;
-                list[i-1].params.exdiDone = exdiDone;
-                container.execute(list[i-1].fn, list[i-1].params, list[i-1].context || container, true);
-                return false;
+                list[i - 1].params.exdiDone = exdiDone;
+                container.execute(list[i - 1].fn, list[i - 1].params, list[i - 1].context || container, true);
             } else {
                 if (clock) {
                     clearTimeout(clock);
                 }
-                return true;
+                result = true;
             }
+            return result;
         };
 
 
         this.add = function (fn, params, context) {
-            if (isValidCaller(fn)) {
+            if (!isValidCaller(fn)) {
                 throw new Error('You can add only functions or array to queue');
             }
             if ((params instanceof Object) === false) {
@@ -141,13 +149,10 @@ if (typeof window !== 'undefined') {
             i = 0;
             exdiDone();
             if (timeoutLimit > 0) {
-                var c = this;
                 clock = setTimeout(function () {
                     exdiDone = function () {
                         return false;
-                        list = [];
-                        i = 0;
-                    }
+                    };
                     for (i = 0; i < timeoutListeners.length; i++) {
                         container.execute(timeoutListeners[i], {}, container, true);
                     }
@@ -174,10 +179,10 @@ if (typeof window !== 'undefined') {
             doneListeners       = [],
             timeoutListeners    = [],
             timeoutLimit        = 0,
-            clock               = false;
+            clock;
 
         this.add = function (fn, params, context) {
-            if (isValidCaller(fn)) {
+            if (!isValidCaller(fn)) {
                 throw new Error('You can add only functions to queue');
             }
             if ((params instanceof Object) === false) {
@@ -189,14 +194,15 @@ if (typeof window !== 'undefined') {
 
             taskNr++;
 
-            (function(taskName){
+            (function (taskName) {
                 params.exdiDone = function () {
                     if (isDone[taskName] !== false) {
                         return;
                     }
                     isDone[taskName] = true;
                     var allDone = true,
-                        name = '';
+                        name;
+
                     for (name in isDone) {
                         if (isDone.hasOwnProperty(name)) {
                             if (isDone[name] === false) {
@@ -225,7 +231,7 @@ if (typeof window !== 'undefined') {
                     context: context
                 };
                 isDone[taskName] = false;
-            })('task' + String(taskNr));
+            }('task' + String(taskNr)));
 
             return this;
         };
@@ -243,7 +249,7 @@ if (typeof window !== 'undefined') {
             if (event !== 'step' && event !== 'done' && event !== 'timeout') {
                 throw new Error('Unrecognized event ' + String(event));
             }
-            if (isValidCaller(callback)) {
+            if (!isValidCaller(callback)) {
                 throw new Error('Callback must be a function');
             }
             if (event === 'step') {
@@ -266,13 +272,15 @@ if (typeof window !== 'undefined') {
 
 
         this.execute = function () {
-            var taskName = '';
-            for(taskName in tasks) {
-                isDone[taskName] = false;
-                container.execute(tasks[taskName].fn, tasks[taskName].params, tasks[taskName].context || container, true);
+            var taskName;
+
+            for (taskName in tasks) {
+                if (tasks.hasOwnProperty(taskName)) {
+                    isDone[taskName] = false;
+                    container.execute(tasks[taskName].fn, tasks[taskName].params, tasks[taskName].context || container, true);
+                }
             }
             if (timeoutLimit > 0) {
-                var c = this;
                 clock = setTimeout(function () {
                     isDone = {};
                     tasks = {};
@@ -328,6 +336,7 @@ if (typeof window !== 'undefined') {
          * Get container value
          * @param name
          * @param params []|undefined
+         * @param constructorContext
          * @returns {*}
          */
         this.get = function (name, params, constructorContext) {
@@ -339,7 +348,7 @@ if (typeof window !== 'undefined') {
                 return this;
             }
             if (/^[A-Z]/.test(name[0].toString()) && isValidCaller(container[name])) {
-                return this.execute(container[name], params, constructorContext);
+                return this.execute(container[name], params, constructorContext, false);
             }
             if (container[name] === undefined) {
                 return params;
@@ -351,32 +360,51 @@ if (typeof window !== 'undefined') {
          * Delete container value
          * @param name
          */
-        this.delete = function (name) {
+        this.remove = function (name) {
             name = String(name);
             delete container[name];
             return this;
         };
 
         /**
+         * @depracated
+         * @type {remove}
+         */
+        this['delete'] = this.remove;
+
+        /**
          * Execute given function using container parameters
          * @param fn
          * @param params
+         * @param context
          * @param async - default false - run function async
          * @returns {*}
          */
         this.execute = function (fn, params, context, async) {
             if (!params) {
-                params = [];
-            }
-
-            if (!isValidCaller(fn)) {
-                throw new Error('You can only execute a function');
+                params = {};
             }
 
             var fnParametersNames,
                 applyParameters = [],
                 i = 0,
-                isArray = (fn instanceof Array) ? true : false;
+                isArray = !!((fn instanceof Array));
+
+            if (isArray) {
+                if (fn.length > 0) {
+                    if (typeof fn[fn.length - 1] === 'string') {
+                        fn[fn.length - 1] = this.get(fn[fn.length - 1], {}, this);
+                    }
+                }
+            }
+
+            if (typeof fn === 'string') {
+                fn = this.get(fn, {}, this);
+            }
+
+            if (!isValidCaller(fn)) {
+                throw new Error('You can only execute a function');
+            }
 
             fnParametersNames = getFunctionParametersNames(fn);
             if (fnParametersNames.length > 0) {
@@ -386,7 +414,7 @@ if (typeof window !== 'undefined') {
                         continue;
                     }
                     if (container[fnParametersNames[i]]) {
-                        applyParameters.push(this.get(fnParametersNames[i]));
+                        applyParameters.push(this.get(fnParametersNames[i], {}, this));
                         continue;
                     }
                     applyParameters.push(undefined);
@@ -398,18 +426,75 @@ if (typeof window !== 'undefined') {
             if (isArray) {
                 fn = fn[fn.length - 1];
             }
+
             return async === true ? runAsync(function () { fn.apply(context, applyParameters); }) : fn.apply(context, applyParameters);
+        };
+
+        /**
+         * Construct object using given function
+         * @param fn
+         * @param params
+         * @param context
+         * @param async
+         * @returns {*}
+         */
+        this.construct = function (fn, params, async) {
+            if (!params) {
+                params = {};
+            }
+
+            var fnParametersNames,
+                applyParameters = [],
+                i = 0,
+                isArray = !!((fn instanceof Array));
+
+            if (isArray) {
+                if (fn.length > 0) {
+                    if (typeof fn[fn.length - 1] === 'string') {
+                        fn[fn.length - 1] = this.get(fn[fn.length - 1], {}, this);
+                    }
+                }
+            }
+
+            if (typeof fn === 'string') {
+                fn = this.get(fn, {}, this);
+            }
+
+            if (!isValidCaller(fn)) {
+                throw new Error('You can only execute a function');
+            }
+
+            fnParametersNames = getFunctionParametersNames(fn);
+            if (fnParametersNames.length > 0) {
+                for (i = 0; i < fnParametersNames.length; i++) {
+                    if (params[fnParametersNames[i]]) {
+                        applyParameters.push(params[fnParametersNames[i]]);
+                        continue;
+                    }
+                    if (container[fnParametersNames[i]]) {
+                        applyParameters.push(this.get(fnParametersNames[i], {}, this));
+                        continue;
+                    }
+                    applyParameters.push(undefined);
+                }
+            }
+
+            if (isArray) {
+                fn = fn[fn.length - 1];
+            }
+
+            return async === true ? runAsync(function () { construct(fn, applyParameters); }) : construct(fn, applyParameters);
         };
 
         this.run = this.execute;
 
         this.createQueue = function () {
             return new Queue(this);
-        }
+        };
 
         this.createParallel = function () {
             return new Parallel(this);
-        }
+        };
     }
 
     var containers = {};
@@ -417,7 +502,7 @@ if (typeof window !== 'undefined') {
     global.get = function (name) {
         name = String(name);
         if ((containers[name] instanceof Container) === false) {
-            containers[name] = new Container();
+            containers[name] = new Container({});
         }
         return containers[name];
     };
@@ -426,11 +511,17 @@ if (typeof window !== 'undefined') {
         return containers;
     };
 
-    global.delete = function (name) {
+    global.remove = function (name) {
         name = String(name);
         delete containers[name];
         return this;
     };
+
+    /**
+     * @depracated
+     * @type {remove|Function|lodash.remove}
+     */
+    global['delete'] = global.remove;
 
     global.create = function () {
         return new Container();
@@ -444,6 +535,6 @@ if (typeof window !== 'undefined') {
 
     global.createParallel = function () {
         return global.createContainer().createParallel();
-    }
+    };
 
-})(typeof window === 'undefined' ? module.exports : window.exdi, typeof window === 'undefined' ? false : true);
+}(typeof window === 'undefined' ? module.exports : window.exdi, typeof window === 'undefined' ? false : true));

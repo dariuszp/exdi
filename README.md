@@ -156,6 +156,40 @@ function add(x, y) {
 }
 ```
 
+Also, sometimes you want to execute function that is already registered. You can do that using string as first parameter for execute.
+Exdi will try to find value inside container using that name. Just remember, it must be a function.
+
+```
+function add(x, y) {
+    this.get('name'); // Will
+    return x + y;
+}
+
+container.set('x', 1);
+container.set('y', 2);
+container.set('add', add);
+
+container.execute('add');
+```
+
+### Creating objects
+
+There is also alternative to .execute() that will execute given function with operator "new".
+
+```JavaScript
+var constructContainer = exdi.create();
+    constructContainer.set('px', 1);
+    constructContainer.set('py', 2);
+
+var c1 = constructContainer.construct(function (px, py) {
+    this.x = px * 2;
+    this.y = py * 2;
+}, { py: 5 });
+
+    c1.x // 2
+    c1.y // 10
+```
+
 ### Queue nad Parallel
 
 Sometimes, you need to take control over code execution. It's hard to do since most of the time You will be dealing with
@@ -257,6 +291,16 @@ order and values of array keys instead of function arguments. Just like that:
 container.set('fullName', ['name', 'surname', function (a, b) {
     return a + ' ' + b;
 }]);
+```
+
+*IMPORTANT*
+Last argument CAN be a string. Just remember that it will be used to extract function from container by given name. Like this:
+
+```
+container.set('concatStrings', function (a, b) {
+   return a + ' ' + b;
+};
+container.set('fullName', ['name', 'surname', 'concatStrings']);
 ```
 
 Now Your cod work again.
