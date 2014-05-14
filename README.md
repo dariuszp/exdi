@@ -303,7 +303,7 @@ container.set('concatStrings', function (a, b) {
 container.set('fullName', ['name', 'surname', 'concatStrings']);
 ```
 
-Now Your cod work again.
+Now Your could work again.
 
 ## REMEMBER
 
